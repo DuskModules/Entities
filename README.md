@@ -27,6 +27,9 @@ Use the command line below to install the submodule into your github project.
 $ git submodule add https://github.com/DuskModules/Entities Assets/DuskModules/1-UtilityModules/Entities
 ```
 
+### Dependency!
+Entities requires the UtilityCollection module in order to compile! Find it here: https://github.com/DuskModules/UtilityCollection
+
 ## Demo & Documentation
 There is an unity package available in the module folder called **DemoPackages.unitypackage**. Import the contents if you want to check out the demo scenes and examples of the module functionality. You can always delete the demo folders without causing conflicts or errors.
 
