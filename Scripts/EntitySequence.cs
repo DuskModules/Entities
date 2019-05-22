@@ -29,18 +29,19 @@ namespace DuskModules.Entities {
 		/// <summary> Whether to go in reverse when disappearing. </summary>
 		[Tooltip("Whether to go in reverse when disappearing")]
 		public bool reverseOnDisappear;
-		
-		/// <summary> Step it is at </summary>
-		private int step;
-		/// <summary> How many have been completed </summary>
-		private int completed;
+
+		/// <summary> Step it is at for appearing </summary>
+		private int appearStep;
+		/// <summary> Step it is at for disappearing </summary>
+		private int disappearStep;
 
 		// Hook into own events
 		protected override void Awake() {
 			base.Awake();
 
-			onAppearing += this.OnAppearing;
-			onDisappearing += this.OnDisappearing;
+			onHidden += OnHidden;
+			onAppearing += OnAppearing;
+			onDisappearing += OnDisappearing;
 			for (int i = 0; i < entities.Count; i++) {
 				entities[i].onAppeared += OnEntityAppeared;
 				entities[i].onDisappeared += OnEntityDisappeared;
@@ -56,69 +57,102 @@ namespace DuskModules.Entities {
 			}
 		}
 
+		// When instantly hidden
+		private void OnHidden() {
+			appearStep = 0;
+			for (int i = 0; i < entities.Count; i++) {
+				entities[i].HideInstantly();
+			}
+		}
+
+		//================================[ Appearing ]================================\\
 		// When appearing starts
 		private void OnAppearing() {
 			appearDelay.Run(OnAppearStart);
 		}
+
 		// Appear start
 		private void OnAppearStart() {
-			step = 0;
-			completed = 0;
+			disappearDelay.Stop();
+			disappearStepDelay.Stop();
+
 			if (entities.Count > 0)
 				TriggerStepAppear();
 			else
 				CompleteStepAppearing();
 		}
 
+		// Triggers the current step to appear
+		private void TriggerStepAppear() {
+			entities[appearStep].StartAppearing();
+			if (appearStep < entities.Count - 1)
+				appearStepDelay.Run(NextStepAppear);
+			else
+				appearStepDelay.Stop();
+		}
+
+		// Trigger next
+		private void NextStepAppear() {
+			appearStep++;
+			if (reverseOnDisappear)
+				disappearStep = appearStep;
+
+			TriggerStepAppear();
+		}
+
+		// Called when a target behaviour has appeared
+		private void OnEntityAppeared() {
+			for (int i = 0; i < entities.Count; i++) {
+				if (entities[i].state != EntityState.visible)
+					return;
+			}
+			CompleteStepAppearing();
+		}
+
+
+		//================================[ Disappearing ]================================\\
 		// When destroying starts
 		private void OnDisappearing() {
 			disappearDelay.Run(OnDisappearStart);
 		}
+
 		// Disappear start
 		private void OnDisappearStart() {
-			step = reverseOnDisappear ? entities.Count - 1 : 0;
-			completed = 0;
+			appearDelay.Stop();
+			appearStepDelay.Stop();
+
 			if (entities.Count > 0)
 				TriggerStepDisappear();
 			else
 				CompleteStepDisappearing();
 		}
 
-		// Triggers the current step to appear
-		private void TriggerStepAppear() {
-			entities[step].StartAppearing();
-			step++;
-			if (step < entities.Count)
-				appearStepDelay.Run(TriggerStepAppear);
-			else
-				appearStepDelay.Stop();
-		}
-
 		// Triggers the current step to dissapear
 		private void TriggerStepDisappear() {
-			entities[step].StartDisappearing();
-			if (reverseOnDisappear) step--;
-			else step++;
-			if (step >= 0 && step < entities.Count)
-				disappearStepDelay.Run(TriggerStepDisappear);
+			entities[disappearStep].StartDisappearing();
+			if ((disappearStep >= 1 || !reverseOnDisappear) && (disappearStep < entities.Count - 1 || reverseOnDisappear))
+				disappearStepDelay.Run(NextStepDisappear);
 			else
 				disappearStepDelay.Stop();
 		}
-
-		// Called when a target behaviour has appeared
-		private void OnEntityAppeared() {
-			completed++;
-			if (completed == entities.Count) {
-				CompleteStepAppearing();
+		// Trigger next
+		private void NextStepDisappear() {
+			if (reverseOnDisappear) {
+				disappearStep--;
+				appearStep = disappearStep;
 			}
+			else disappearStep++;
+
+			TriggerStepDisappear();
 		}
 
 		// Called when a target behaviour has disappeared.
 		private void OnEntityDisappeared() {
-			completed++;
-			if (completed == entities.Count) {
-				CompleteStepDisappearing();
+			for (int i = 0; i < entities.Count; i++) {
+				if (entities[i].state != EntityState.hidden)
+					return;
 			}
+			CompleteStepDisappearing();
 		}
 
 		// Update timer
