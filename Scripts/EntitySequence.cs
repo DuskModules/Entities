@@ -38,13 +38,21 @@ namespace DuskModules.Entities {
 		// Hook into own events
 		protected override void Awake() {
 			base.Awake();
-
+			
 			onHidden += OnHidden;
 			onAppearing += OnAppearing;
 			onDisappearing += OnDisappearing;
 			for (int i = 0; i < entities.Count; i++) {
 				entities[i].onAppeared += OnEntityAppeared;
 				entities[i].onDisappeared += OnEntityDisappeared;
+			}
+
+			switch (state) {
+				case EntityState.created: OnHidden(); break;
+				case EntityState.appearing: OnAppearing(); break;
+				case EntityState.visible: OnAppearing(); break;
+				case EntityState.disappearing: OnDisappearing(); break;
+				case EntityState.hidden: OnHidden(); break;
 			}
 		}
 

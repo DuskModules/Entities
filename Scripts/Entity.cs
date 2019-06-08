@@ -5,28 +5,28 @@ using UnityEngine;
 
 namespace DuskModules.Entities {
 
-  /// <summary> State of an entity's existence </summary>
-  public enum EntityState {
-    created,      // When it has not called any event yet, and has just been created.
-    appearing,    // When it is becoming visible over time.
-    visible,      // When it is visible, and growing or standing by at full visibility
-    disappearing, // When it is being invisible over time
-    hidden        // When it is fully dissapeared and invisible.
-  }
+	/// <summary> State of an entity's existence </summary>
+	public enum EntityState {
+		created,      // When it has not called any event yet, and has just been created.
+		appearing,    // When it is becoming visible over time.
+		visible,      // When it is visible, and growing or standing by at full visibility
+		disappearing, // When it is being invisible over time
+		hidden        // When it is fully dissapeared and invisible.
+	}
 
-  /// <summary> Behaviour to attach to any object that must be able to visually appear and dissapear. </summary>
-  [AddComponentMenu("DuskModules/Entities/Entity", 0)]
-  public class Entity : MonoBehaviour {
+	/// <summary> Behaviour to attach to any object that must be able to visually appear and dissapear. </summary>
+	[AddComponentMenu("DuskModules/Entities/Entity", 0)]
+	public class Entity : MonoBehaviour {
 
 		/// <summary> The Main Entity on this object. Could be itself, could be something else. </summary>
 		protected Entity mainEntity;
 
-    /// <summary> Called when appearing starts. Call CompleteStepAppearing once when done with what you're doing. </summary>
-    public event Action onAppearing;
+		/// <summary> Called when appearing starts. Call CompleteStepAppearing once when done with what you're doing. </summary>
+		public event Action onAppearing;
 		/// <summary> Called when it has fully appeared </summary>
 		public event Action onAppeared;
-    /// <summary> Called when destruction starts. Call CompleteStepDisappearing once when done with what you're doing. </summary>
-    public event Action onDisappearing;
+		/// <summary> Called when destruction starts. Call CompleteStepDisappearing once when done with what you're doing. </summary>
+		public event Action onDisappearing;
 		/// <summary> Called when destruction completes </summary>
 		public event Action onDisappeared;
 		/// <summary> Called when hidden </summary>
@@ -35,14 +35,14 @@ namespace DuskModules.Entities {
 		/// <summary> State of entity </summary>
 		public EntityState state { get; protected set; }
 
-    /// <summary> Whether the entity is currently visible </summary>
-    public bool visible => state != EntityState.hidden;
-    /// <summary> Whether the entity is currently or soon to be fully visible </summary>
-    public bool toVisible => state == EntityState.appearing || state == EntityState.visible;
+		/// <summary> Whether the entity is currently visible </summary>
+		public bool visible => state != EntityState.hidden;
+		/// <summary> Whether the entity is currently or soon to be fully visible </summary>
+		public bool toVisible => state == EntityState.appearing || state == EntityState.visible;
 
-    /// <summary> How many listeners have completed </summary>
-    private int listenerStep;
-
+		/// <summary> How many listeners have completed </summary>
+		private int listenerStep;
+		
 		/// <summary> Awakens and checks for main, hooking into its events if this is not it </summary>
 		protected virtual void Awake() {
 			CheckMainEntity();
@@ -52,7 +52,7 @@ namespace DuskModules.Entities {
 				mainEntity.onDisappearing += StartDisappear;
 				mainEntity.onDisappeared += CompleteDisappear;
 				mainEntity.onHidden += HideInstant;
-
+				
 				// Match current state
 				switch (mainEntity.state) {
 					case EntityState.created: HideInstant(); break;
@@ -76,7 +76,7 @@ namespace DuskModules.Entities {
 
 		// Checks main entity existence
 		private void CheckMainEntity() {
-			if (mainEntity == null) mainEntity = gameObject.GetComponent<Entity>(); ;
+			if (mainEntity == null) mainEntity = gameObject.GetComponent<Entity>();
 		}
 
 		/// <summary> On enable, it hides and appears automatically. Override it to disable this. </summary>
@@ -86,9 +86,9 @@ namespace DuskModules.Entities {
 		}
 		/// <summary> On disable, it sets state as hidden. </summary>
 		protected virtual void OnDisable() {
-      if (state != EntityState.hidden)
+			if (state != EntityState.hidden)
 				HideInstant();
-    }
+		}
 
 		/// <summary> Start appearing the object. </summary>
 		public void StartAppearing() {
@@ -99,28 +99,28 @@ namespace DuskModules.Entities {
 		protected void StartAppear() {
 			if (state == EntityState.created)
 				HideInstant();
-			
+
 			if (state != EntityState.appearing && state != EntityState.visible) {
 				gameObject.SetActive(true);
 
 				state = EntityState.appearing;
-        if (onAppearing != null && onAppearing.GetInvocationList().Length > 0) {
-          listenerStep = onAppearing.GetInvocationList().Length;
+				if (onAppearing != null && onAppearing.GetInvocationList().Length > 0) {
+					listenerStep = onAppearing.GetInvocationList().Length;
 					onAppearing.Invoke();
-        }
-        else
+				}
+				else
 					CompleteAppear();
 			}
 		}
 
-    /// <summary> Completes one of the appearing listeners. </summary>
-    public void CompleteStepAppearing() {
-      if (state == EntityState.appearing) {
-        listenerStep--;
-        if (listenerStep == 0)
+		/// <summary> Completes one of the appearing listeners. </summary>
+		public void CompleteStepAppearing() {
+			if (state == EntityState.appearing) {
+				listenerStep--;
+				if (listenerStep == 0)
 					CompleteAppear();
-      }
-    }
+			}
+		}
 
 		/// <summary> Completes appearing the object. </summary>
 		public void CompleteAppearing() {
@@ -129,9 +129,9 @@ namespace DuskModules.Entities {
 		}
 		/// <summary> Completes appearing the entity. </summary>
 		protected void CompleteAppear() {
-      if (state == EntityState.created)
-        HideInstant();
-			
+			if (state == EntityState.created)
+				HideInstant();
+
 			if (state != EntityState.visible) {
 				gameObject.SetActive(true);
 
@@ -155,23 +155,23 @@ namespace DuskModules.Entities {
 		protected void StartDisappear() {
 			if (state != EntityState.disappearing && state != EntityState.hidden) {
 				state = EntityState.disappearing;
-        if (onDisappearing != null && onDisappearing.GetInvocationList().Length > 0) {
-          listenerStep = onDisappearing.GetInvocationList().Length;
-          onDisappearing.Invoke();
-        }
-        else
-          CompleteDisappear();
+				if (onDisappearing != null && onDisappearing.GetInvocationList().Length > 0) {
+					listenerStep = onDisappearing.GetInvocationList().Length;
+					onDisappearing.Invoke();
+				}
+				else
+					CompleteDisappear();
 			}
 		}
 
-    /// <summary> Completes one of the appearing listeners. </summary>
-    public void CompleteStepDisappearing() {
-      if (state == EntityState.disappearing) {
-        listenerStep--;
-        if (listenerStep == 0)
+		/// <summary> Completes one of the appearing listeners. </summary>
+		public void CompleteStepDisappearing() {
+			if (state == EntityState.disappearing) {
+				listenerStep--;
+				if (listenerStep == 0)
 					CompleteDisappear();
-      }
-    }
+			}
+		}
 
 		/// <summary> Completes disappearing the object. </summary>
 		public void CompleteDisappearing() {
@@ -181,10 +181,10 @@ namespace DuskModules.Entities {
 
 		/// <summary> Completes disappearing the entity. </summary>
 		public virtual void CompleteDisappear() {
-      if (state != EntityState.disappearing)
-        onDisappearing?.Invoke();
+			if (state != EntityState.disappearing)
+				onDisappearing?.Invoke();
 
-      if (state != EntityState.hidden) {
+			if (state != EntityState.hidden) {
 				state = EntityState.hidden;
 				onDisappeared?.Invoke();
 				onHidden?.Invoke();
