@@ -83,6 +83,8 @@ namespace DuskModules.Entities {
 		private void OnAppearStart() {
 			disappearDelay.Stop();
 			disappearStepDelay.Stop();
+			if (!reverseOnDisappear)
+				appearStep = 0;
 
 			if (entities.Count > 0)
 				TriggerStepAppear();
@@ -128,6 +130,8 @@ namespace DuskModules.Entities {
 		private void OnDisappearStart() {
 			appearDelay.Stop();
 			appearStepDelay.Stop();
+			if (!reverseOnDisappear)
+				disappearStep = 0;
 
 			if (entities.Count > 0)
 				TriggerStepDisappear();
@@ -165,10 +169,10 @@ namespace DuskModules.Entities {
 
 		// Update timer
 		private void Update() {
-			appearDelay.Update();
-			disappearDelay.Update();
-			appearStepDelay.Update();
-			disappearStepDelay.Update();
+			appearDelay.Update(deltaTime);
+			disappearDelay.Update(deltaTime);
+			appearStepDelay.Update(deltaTime);
+			disappearStepDelay.Update(deltaTime);
 		}
 
 		/// <summary> Editor button to reset and fill list with nearest children behaviours. </summary>

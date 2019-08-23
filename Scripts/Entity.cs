@@ -42,9 +42,28 @@ namespace DuskModules.Entities {
 
 		/// <summary> How many listeners have completed </summary>
 		private int listenerStep;
-		
+
+		/// <summary> The type of timescale used. Uses deltaTime normally, but is set to unscaled if it is a RectTransform, which is likely in UI. </summary>
+		public TimeType useTimeScale { get; set; }
+
+		/// <summary> Passed time for this entity effect </summary>
+		public float deltaTime {
+			get {
+				switch (useTimeScale) {
+					case TimeType.deltaTime: return Time.deltaTime;
+					case TimeType.unscaledDeltaTime: return DuskUtility.interfaceDeltaTime;
+				}
+				return 0;
+			}
+		}
+
 		/// <summary> Awakens and checks for main, hooking into its events if this is not it </summary>
 		protected virtual void Awake() {
+			if (transform.IsOfType(typeof(RectTransform)))
+				useTimeScale = TimeType.unscaledDeltaTime;
+			else
+				useTimeScale = TimeType.deltaTime;
+
 			CheckMainEntity();
 			if (mainEntity != this) {
 				mainEntity.onAppearing += StartAppear;
