@@ -5,38 +5,27 @@ using UnityEngine;
 namespace DuskModules.Entities {
 
 	/// <summary> An entity that appears itself on start, and destroys itself on disappear. </summary>
-	[AddComponentMenu("Entities/Entity Object", 0)]
-	public class EntityObject : Entity {
-
-		/// <summary> Whether the entity and all attached scripts have confirmed awoken. </summary>
-		private bool awoken;
-
-		// Hook into self
-		protected override void Awake() {
-			base.Awake();
+	[AddComponentMenu("Entities/Entity Object")]
+	public class EntityObject : EntityCore {
+		
+		/// <summary> Listen for it's own disappearing. </summary>
+		protected override void Setup() {
 			onDisappeared += HandleDisappear;
-		}
 
-		/// <summary> On enable, it hides and appears automatically. Override it to disable this. </summary>
-		protected override void OnEnable() {
-			if (state != EntityState.appearing && state != EntityState.visible) {
-				HideInstant();
-				AttemptAppear();
-			}
-		}
+			base.Setup();
 
-		/// <summary> Only appear after start has been called. </summary>
-		protected virtual void Start() {
-			awoken = true;
-			AttemptAppear();
+			StartAppearing();
 		}
-
-		/// <summary> Attempts appearing the entity object </summary>
-		private void AttemptAppear() {
-			if (awoken)
-				StartAppear();
+		
+		/// <summary> On enable, show itself </summary>
+		protected virtual void OnEnable() {
+			StartAppearing();
 		}
-
+		/// <summary> Set to hidden if disabled by external means </summary>
+		protected virtual void OnDisable() {
+			HideInstantly();
+		}
+		
 		/// <summary> Handle what should happen when it dissapears </summary>
 		protected virtual void HandleDisappear() {
 			Destroy(gameObject);
