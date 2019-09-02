@@ -73,15 +73,18 @@ namespace DuskModules.Entities {
 
 		// Appear start
 		private void OnAppearStart() {
-			disappearDelay.Stop();
-			disappearStepDelay.Stop();
 			if (!reverseOnDisappear)
 				appearStep = 0;
+			else
+				disappearStep = appearStep;
 
 			if (entities.Count > 0)
 				TriggerStepAppear();
 			else
 				CompleteAppearing();
+
+			disappearDelay.Stop();
+			disappearStepDelay.Stop();
 		}
 
 		// Triggers the current step to appear
@@ -91,7 +94,7 @@ namespace DuskModules.Entities {
 				appearStepDelay.Run(NextStepAppear);
 			else {
 				appearStepDelay.Stop();
-				CompleteAppearing();
+				OnEntityAppeared();
 			}
 		}
 
@@ -124,15 +127,18 @@ namespace DuskModules.Entities {
 
 		// Disappear start
 		private void OnDisappearStart() {
-			appearDelay.Stop();
-			appearStepDelay.Stop();
 			if (!reverseOnDisappear)
 				disappearStep = 0;
+			else
+				appearStep = disappearStep;
 
 			if (entities.Count > 0)
 				TriggerStepDisappear();
 			else
 				CompleteDisappearing();
+
+			appearDelay.Stop();
+			appearStepDelay.Stop();
 		}
 
 		// Triggers the current step to dissapear
@@ -142,7 +148,7 @@ namespace DuskModules.Entities {
 				disappearStepDelay.Run(NextStepDisappear);
 			else {
 				disappearStepDelay.Stop();
-				CompleteDisappearing();
+				OnEntityDisappeared();
 			}
 		}
 		// Trigger next
