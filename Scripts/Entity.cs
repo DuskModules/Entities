@@ -57,7 +57,7 @@ namespace DuskModules.Entities {
 		}
 
 		/// <summary> Attempts to setup, executed only once. </summary>
-		protected void CheckSetup() {
+		public void CheckSetup() {
 			if (!hasSetup) {
 				hasSetup = true;
 				Setup();
