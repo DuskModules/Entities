@@ -10,13 +10,10 @@ namespace DuskModules.Entities {
 		
 		/// <summary> Listen for it's own disappearing. </summary>
 		protected override void Setup() {
-			onDisappeared += HandleDisappear;
-
 			base.Setup();
-
 			StartAppearing();
 		}
-		
+
 		/// <summary> On enable, show itself </summary>
 		protected virtual void OnEnable() {
 			StartAppearing();
@@ -25,11 +22,11 @@ namespace DuskModules.Entities {
 		protected virtual void OnDisable() {
 			HideInstantly();
 		}
-		
-		/// <summary> Handle what should happen when it dissapears </summary>
-		protected virtual void HandleDisappear() {
+
+		/// <summary> Destroy the object. </summary>
+		protected override void DeactivateEntity() {
 			Destroy(gameObject);
 		}
-	}
 
+	}
 }

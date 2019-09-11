@@ -180,7 +180,7 @@ namespace DuskModules.Entities {
 		//================================[ Invokes ]================================\\
 		/// <summary> Invokes all listeners for onAppearing </summary>
 		protected sealed override void InvokeAppearing() {
-			gameObject.SetActive(true);
+			ActivateEntity();
 			for (int i = 0; i < entities.Count; i++) {
 				OtherEntityAppearing(entities[i]);
 			}
@@ -189,7 +189,7 @@ namespace DuskModules.Entities {
 
 		/// <summary> Invokes all listeners for onAppeared </summary>
 		protected sealed override void InvokeAppeared() {
-			gameObject.SetActive(true);
+			ActivateEntity();
 			for (int i = 0; i < entities.Count; i++) {
 				OtherEntityAppeared(entities[i]);
 			}
@@ -218,8 +218,19 @@ namespace DuskModules.Entities {
 				OtherEntityHide(entities[i]);
 			}
 			base.InvokeHidden();
+			DeactivateEntity();
+		}
+
+		/// <summary> Called when the entity object must be activated </summary>
+		protected virtual void ActivateEntity() {
+			gameObject.SetActive(true);
+		}
+
+		/// <summary> Called when the enttiy object must be deactivated </summary>
+		protected virtual void DeactivateEntity() {
 			gameObject.SetActive(false);
 		}
+
 
 	}
 }
