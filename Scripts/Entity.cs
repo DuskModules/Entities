@@ -99,7 +99,7 @@ namespace DuskModules.Entities {
 		}
 
 		/// <summary> Completes appearing the entity itself. </summary>
-		public void CompleteAppearing() {
+		protected void CompleteAppearing() {
 			CheckSetup();
 			core.CompleteAppearStep(this);
 		}
@@ -131,7 +131,7 @@ namespace DuskModules.Entities {
 		}
 
 		/// <summary> Completes disappearing the entity itself </summary>
-		public void CompleteDisappearing() {
+		protected void CompleteDisappearing() {
 			CheckSetup();
 			core.CompleteDisappearStep(this);
 		}

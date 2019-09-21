@@ -8,7 +8,10 @@ namespace DuskModules.Entities {
 	/// <summary> Controller for any object with entities attached </summary>
 	[AddComponentMenu("Entities/Entity Core")]
 	public class EntityCore : Entity {
-		
+
+		/// <summary> Called when entity core is activated </summary>
+		public event Action onActivate;
+
 		/// <summary> Parts on this entity </summary>
 		public List<Entity> entities { get; protected set; }
 		/// <summary> Parts in progress of animating </summary>
@@ -223,7 +226,10 @@ namespace DuskModules.Entities {
 
 		/// <summary> Called when the entity object must be activated </summary>
 		protected virtual void ActivateEntity() {
-			gameObject.SetActive(true);
+			if (!gameObject.activeSelf) {
+				gameObject.SetActive(true);
+				InvokeActivate();
+			}
 		}
 
 		/// <summary> Called when the enttiy object must be deactivated </summary>
@@ -231,6 +237,9 @@ namespace DuskModules.Entities {
 			gameObject.SetActive(false);
 		}
 
-
+		/// <summary> Invokes activation </summary>
+		protected void InvokeActivate() {
+			onActivate?.Invoke();
+		}
 	}
 }

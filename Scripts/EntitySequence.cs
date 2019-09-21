@@ -1,24 +1,25 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace DuskModules.Entities {
 
-  /// <summary> Fires a sequence of entities to appear or dissapear. </summary>
-  [AddComponentMenu("DuskModules/Entities/Entity Sequence", 0)]
-  public class EntitySequence : Entity {
-		
-    /// <summary> The actual entities to fire off </summary>
-    [Tooltip("List of entities to appear and dissapear, and in what order.")]
+	/// <summary> Fires a sequence of entities to appear or dissapear. </summary>
+	[AddComponentMenu("DuskModules/Entities/Entity Sequence", 0)]
+	public class EntitySequence : Entity {
+
+		/// <summary> The actual entities to fire off </summary>
+		[Tooltip("List of entities to appear and dissapear, and in what order.")]
 		public List<Entity> entities;
-		
+
 		/// <summary> Delay to wait between each step </summary>
 		[Tooltip("Delay to wait between the start of each entity to appear.")]
 		public TimerValue appearStepDelay;
 		/// <summary> Delay to wait between each step </summary>
 		[Tooltip("Delay to wait between the start of each entity to dissapear.")]
 		public TimerValue disappearStepDelay;
-		
+
 		/// <summary> Delay to wait before the whole sequence </summary>
 		[Tooltip("Delay to wait before appearing")]
 		public TimerValue appearDelay;
@@ -38,6 +39,7 @@ namespace DuskModules.Entities {
 		// Listen for target entities callback
 		protected override void Setup() {
 			base.Setup();
+			
 			for (int i = 0; i < entities.Count; i++) {
 				entities[i].onAppeared += OnEntityAppeared;
 				entities[i].onDisappeared += OnEntityDisappeared;
@@ -53,26 +55,46 @@ namespace DuskModules.Entities {
 			}
 		}
 
-		/// <summary> On hide </summary>
-		protected override void EntityHide() {
-			base.EntityHide();
-
-			appearStep = 0;
-			for (int i = 0; i < entities.Count; i++) {
-				entities[i].HideInstantly();
+		/// <summary> Adds an entity core to the sequence. </summary>
+		public void AddEntity(EntityCore entityCore) {
+			if (!entities.Contains(entityCore)) {
+				entities.Add(entityCore);
+				entityCore.onAppeared += OnEntityAppeared;
+				entityCore.onDisappeared += OnEntityDisappeared;
 			}
 		}
+
+		/// <summary> Removes an entity core from the sequence. </summary>
+		public void RemoveEntity(EntityCore entityCore) {
+			if (entities.Contains(entityCore)) {
+				entities.Remove(entityCore);
+				entityCore.onAppeared -= OnEntityAppeared;
+				entityCore.onDisappeared -= OnEntityDisappeared;
+			}
+		}
+
+		/// <summary> Removes all entities from sequence </summary>
+		public void ClearSequence() {
+			for (int i = 0; i < entities.Count; i++) {
+				entities[i].onAppeared -= OnEntityAppeared;
+				entities[i].onDisappeared -= OnEntityDisappeared;
+			}
+			entities = new List<Entity>();
+		}
+
 
 		//================================[ Appearing ]================================\\
 		/// <summary> Appear all things </summary>
 		protected override void EntityAppearing() {
 			base.EntityAppearing();
-
 			appearDelay.Run(OnAppearStart);
 		}
 
 		// Appear start
 		private void OnAppearStart() {
+			disappearDelay.Stop();
+			disappearStepDelay.Stop();
+
 			if (!reverseOnDisappear)
 				appearStep = 0;
 			else
@@ -82,16 +104,14 @@ namespace DuskModules.Entities {
 				TriggerStepAppear();
 			else
 				CompleteAppearing();
-
-			disappearDelay.Stop();
-			disappearStepDelay.Stop();
 		}
 
 		// Triggers the current step to appear
 		private void TriggerStepAppear() {
 			entities[appearStep].StartAppearing();
-			if (appearStep < entities.Count - 1)
+			if (appearStep < entities.Count - 1) {
 				appearStepDelay.Run(NextStepAppear);
+			}
 			else {
 				appearStepDelay.Stop();
 				OnEntityAppeared();
@@ -121,12 +141,14 @@ namespace DuskModules.Entities {
 		/// <summary> Disappear everything </summary>
 		protected override void EntityDisappearing() {
 			base.EntityDisappearing();
-
 			disappearDelay.Run(OnDisappearStart);
 		}
 
 		// Disappear start
 		private void OnDisappearStart() {
+			appearDelay.Stop();
+			appearStepDelay.Stop();
+
 			if (!reverseOnDisappear)
 				disappearStep = 0;
 			else
@@ -136,9 +158,6 @@ namespace DuskModules.Entities {
 				TriggerStepDisappear();
 			else
 				CompleteDisappearing();
-
-			appearDelay.Stop();
-			appearStepDelay.Stop();
 		}
 
 		// Triggers the current step to dissapear
@@ -171,6 +190,16 @@ namespace DuskModules.Entities {
 			CompleteDisappearing();
 		}
 
+		/// <summary> On hide </summary>
+		protected override void EntityHide() {
+			appearStep = 0;
+			for (int i = 0; i < entities.Count; i++) {
+				entities[i].HideInstantly();
+			}
+			// Finalize hide self after all entities are hidden
+			base.EntityHide();
+		}
+		
 		// Update timer
 		private void Update() {
 			appearDelay.Update(deltaTime);
